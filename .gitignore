@@ -1,0 +1,6 @@
+**/.terraform/
+**/.terraform.lock.hcl
+*.tfstate
+*.tfstate.*
+**/.DS_Store
+**/*_override.tf
