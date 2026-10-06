@@ -10,9 +10,13 @@ resource uses them.
 
 ## Stacks
 
-Every stack starts 5 runs: 3 healthy runs, then 2 issue runs. An issue run sets
+Every stack starts 4 runs: 3 healthy runs, then 1 issue run. An issue run sets
 `TF_VAR_trigger_issue=true`. Terraform reads it as `var.trigger_issue`, and the
 hooks read it from the environment.
+
+Keep it at one issue run. The backend marks a run slow when a duration is more
+than twice the P95 of the stack's earlier runs. A second slow run has the first
+one in its P95, so the backend does not mark it slow.
 
 | Stack                   | Issue run                                                                |
 | ----------------------- | ------------------------------------------------------------------------ |
@@ -90,7 +94,7 @@ spacectl stack deploy --id run-obs-int-bootstrap
 ```
 
 The runs fire once, when the bootstrap stack creates the stacks. A slow issue
-run takes about 4 minutes, so give the stacks about 20 minutes.
+run takes about 4 minutes, so give the stacks about 15 minutes.
 
 ## Running more issue runs
 

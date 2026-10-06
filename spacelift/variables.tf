@@ -54,8 +54,8 @@ variable "healthy_runs" {
 
 variable "issue_runs" {
   type        = number
-  description = "Runs after the healthy ones that set TF_VAR_trigger_issue=true."
-  default     = 2
+  description = "Runs after the healthy ones that set TF_VAR_trigger_issue=true. Keep it at 1: the backend compares a run with the P95 of the stack's earlier runs, so a second slow run has the first one in its baseline and is not marked slow."
+  default     = 1
 }
 
 variable "slow_seconds" {
