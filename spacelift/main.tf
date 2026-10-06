@@ -6,6 +6,7 @@
 locals {
   decoy_hooks = {
     before_init = ["sh ../hooks/step.sh fetch-secrets 1"]
+    after_init  = []
     before_plan = ["sh ../hooks/step.sh render-config 2"]
     after_plan  = []
     after_apply = ["sh ../hooks/step.sh notify 1"]
@@ -34,12 +35,18 @@ locals {
       description = "Init fails. One provider cannot be downloaded."
       before_init = ["sh ../hooks/add-providers.sh fail"]
     }
+    "findings-a" = {
+      description = "The run finishes with findings. A provider changes version and resolves at two versions."
+      before_init = ["sh ../hooks/provider-findings.sh pin"]
+      after_init  = ["sh ../hooks/provider-findings.sh conflict"]
+    }
   }
 
   stacks = {
     for key, entry in local.stack_entries : key => {
       description = entry.description
       before_init = concat(local.decoy_hooks.before_init, try(entry.before_init, []))
+      after_init  = concat(local.decoy_hooks.after_init, try(entry.after_init, []))
       before_plan = concat(local.decoy_hooks.before_plan, try(entry.before_plan, []))
       after_plan  = concat(local.decoy_hooks.after_plan, try(entry.after_plan, []))
       after_apply = local.decoy_hooks.after_apply
@@ -93,6 +100,7 @@ resource "spacelift_stack" "test_case" {
   }
 
   before_init = each.value.before_init
+  after_init  = each.value.after_init
   before_plan = each.value.before_plan
   after_plan  = each.value.after_plan
   after_apply = each.value.after_apply

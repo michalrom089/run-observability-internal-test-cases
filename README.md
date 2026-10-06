@@ -1,7 +1,8 @@
 # run-observability-internal-test-cases
 
 Stacks for internal testing of the run observability dashboard. Each stack runs
-healthy a few times, then gets slow or fails for one known reason. The tester
+healthy a few times, then gets slow, fails or gets findings for one known
+reason. The tester
 uses the dashboard to find that reason.
 
 Nothing here costs money. The resources are `terraform_data`, `time_sleep` and
@@ -18,14 +19,15 @@ Keep it at one issue run. The backend marks a run slow when a duration is more
 than twice the P95 of the stack's earlier runs. A second slow run has the first
 one in its P95, so the backend does not mark it slow.
 
-| Stack                   | Issue run                                                                |
-| ----------------------- | ------------------------------------------------------------------------ |
-| `run-obs-slow-runs-a`   | `time_sleep.database_migration` takes 240 s instead of 5 s.              |
-| `run-obs-slow-runs-b`   | The `after_plan` hook `policy-scan` takes 240 s instead of 2 s.          |
-| `run-obs-slow-runs-c`   | Init downloads `hashicorp/aws`, `hashicorp/azurerm`, `hashicorp/google`. |
-| `run-obs-failed-runs-a` | The plan fails. `data.external.image_lookup` exits 1.                    |
-| `run-obs-failed-runs-b` | The `before_plan` hook `validate-config` exits 1.                        |
-| `run-obs-failed-runs-c` | Init fails. `registry.acme.invalid/acme/platform` cannot resolve.        |
+| Stack                   | Issue run                                                                    |
+| ----------------------- | ---------------------------------------------------------------------------- |
+| `run-obs-slow-runs-a`   | `time_sleep.database_migration` takes 240 s instead of 5 s.                  |
+| `run-obs-slow-runs-b`   | The `after_plan` hook `policy-scan` takes 240 s instead of 2 s.              |
+| `run-obs-slow-runs-c`   | Init downloads `hashicorp/aws`, `hashicorp/azurerm`, `hashicorp/google`.     |
+| `run-obs-failed-runs-a` | The plan fails. `data.external.image_lookup` exits 1.                        |
+| `run-obs-failed-runs-b` | The `before_plan` hook `validate-config` exits 1.                            |
+| `run-obs-failed-runs-c` | Init fails. `registry.acme.invalid/acme/platform` cannot resolve.            |
+| `run-obs-findings-a`    | The run finishes with `ProviderVersionChange` and `ProviderVersionConflict`. |
 
 Every stack also has the same decoys, so the culprit is not the only item on
 the dashboard:
@@ -35,10 +37,23 @@ the dashboard:
   and `notify` (`after_apply`)
 - the providers `hashicorp/random` and `hashicorp/time`
 
+### `findings-a`
+
+The healthy runs resolve the newest `hashicorp/random`, 3.9.x. In the issue
+run, two hooks run `hooks/provider-findings.sh`:
+
+- `before_init` pins `hashicorp/random` to 3.6.3. The version moves from the
+  healthy runs, so the run reports `ProviderVersionChange`.
+- `after_init` runs `tofu -chdir=pinned init`. `pinned/` requires 3.5.1, so
+  Initializing resolves two versions and the run reports
+  `ProviderVersionConflict`.
+
+The run itself finishes. Nothing in it is slow or fails.
+
 ## Getting started
 
 This creates one bootstrap stack. The bootstrap stack creates the space, the
-six stacks and their runs. The commands need spacectl v1.20.0 or later and a
+seven stacks and their runs. The commands need spacectl v1.20.0 or later and a
 spacectl profile.
 
 **1. Create the bootstrap stack.** It reads this repository over the raw Git
