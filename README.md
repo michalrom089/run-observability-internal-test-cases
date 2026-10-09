@@ -56,17 +56,17 @@ This creates one bootstrap stack. The bootstrap stack creates the space, the
 seven stacks and their runs. The commands need spacectl v1.20.0 or later and a
 spacectl profile.
 
-**1. Create the bootstrap stack.** It reads this repository over the raw Git
-vendor, so your account needs no VCS integration.
+**1. Create the bootstrap stack.** It reads this repository through the
+managed GitHub integration. The GitHub app installation must cover this
+repository.
 
 ```bash
 spacectl api --variables '{
   "input": {
     "name": "run-obs-int-bootstrap",
     "description": "Creates the run observability internal testing space and stacks.",
-    "provider": "GIT",
+    "provider": "GITHUB",
     "repository": "run-observability-internal-test-cases",
-    "repositoryURL": "https://github.com/michalrom089/run-observability-internal-test-cases.git",
     "namespace": "michalrom089",
     "branch": "main",
     "projectRoot": "spacelift",
@@ -128,12 +128,5 @@ TF_VAR_trigger_issue=true sh ../hooks/step.sh validate-config 1 fail
 
 ## Changing a case
 
-The stacks read this repository through the raw Git vendor. The vendor gets no
-push events, so a push does not move a stack's tracked commit. After you push a
-change to a case, sync each stack you changed:
-
-```bash
-spacectl stack sync-commit --id run-obs-slow-runs-a
-```
-
-Otherwise the stack runs new hooks against old code.
+The stacks read this repository through the managed GitHub integration. A
+push to `main` starts a tracked run on each stack whose project root changed.
