@@ -23,7 +23,8 @@ module "workload" {
   trigger = terraform_data.trigger.output
 }
 
-# The culprit is init. The before_init hook adds three large providers.
+# The culprit is init. The before_init hook adds three large providers, and
+# the after_init hook removes them again, so plan and apply stay fast.
 # See hooks/add-providers.sh.
 
 resource "random_id" "output" {

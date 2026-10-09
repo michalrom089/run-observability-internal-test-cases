@@ -10,16 +10,16 @@ the reason per stack. Keep that table correct.
 
 ## Layout
 
-| Path                         | Purpose                                                     |
-| ---------------------------- | ----------------------------------------------------------- |
-| `slow-runs-a/` … `-c/`       | Slow cases: a resource, a hook, provider downloads.         |
-| `failed-runs-a/` … `-c/`     | Failed cases: a data source, a hook, a provider.            |
-| `findings-a/`                | Provider findings: a version change and a version conflict. |
-| `modules/workload/`          | The decoy resources. Every case calls it.                   |
-| `hooks/step.sh`              | Every hook. Sleeps, and is slow or fails on an issue.       |
-| `hooks/add-providers.sh`     | Adds providers before init in the `-c` cases.               |
-| `hooks/provider-findings.sh` | Pins and installs `hashicorp/random` in `findings-a`.       |
-| `spacelift/`                 | Not a case. Creates the space, the stacks and the runs.     |
+| Path                         | Purpose                                                                                 |
+| ---------------------------- | --------------------------------------------------------------------------------------- |
+| `slow-runs-a/` … `-c/`       | Slow cases: a resource, a hook, provider downloads.                                     |
+| `failed-runs-a/` … `-c/`     | Failed cases: a data source, a hook, a provider.                                        |
+| `findings-a/`                | Provider findings: a version change and a version conflict.                             |
+| `modules/workload/`          | The decoy resources. Every case calls it.                                               |
+| `hooks/step.sh`              | Every hook. Sleeps, and is slow or fails on an issue.                                   |
+| `hooks/add-providers.sh`     | Adds providers before init in the `-c` cases. Removes them after init in `slow-runs-c`. |
+| `hooks/provider-findings.sh` | Pins and installs `hashicorp/random` in `findings-a`.                                   |
+| `spacelift/`                 | Not a case. Creates the space, the stacks and the runs.                                 |
 
 ## Rules
 

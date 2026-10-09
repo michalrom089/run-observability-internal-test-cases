@@ -1,12 +1,14 @@
 #!/bin/sh
-# Usage: sh ../hooks/add-providers.sh <slow|fail>
+# Usage: sh ../hooks/add-providers.sh <slow|fail|clean>
 #
-# The stack runs this before init. In a healthy run it does nothing. In a run
-# that sets TF_VAR_trigger_issue=true it writes extra_providers_override.tf, so
-# init has more providers to install:
+# The stack runs slow or fail before init. In a healthy run it does nothing. In
+# a run that sets TF_VAR_trigger_issue=true it writes
+# extra_providers_override.tf, so init has more providers to install:
 #
-#   slow  three large providers from the public registry.
-#   fail  a provider from a registry host that does not resolve.
+#   slow   three large providers from the public registry.
+#   fail   a provider from a registry host that does not resolve.
+#   clean  runs after init. It deletes the override file, so plan and apply do
+#          not start the providers to load their schemas. Only init gets slow.
 #
 # An override file, because a module takes only one required_providers block.
 # Override files merge their entries into it. No resource uses these
@@ -14,6 +16,12 @@
 set -eu
 
 mode=$1
+
+if [ "$mode" = "clean" ]; then
+  rm -f extra_providers_override.tf
+  echo "add-providers: removed extra_providers_override.tf"
+  exit 0
+fi
 
 if [ "${TF_VAR_trigger_issue:-false}" != "true" ]; then
   echo "add-providers: healthy run, no extra providers"

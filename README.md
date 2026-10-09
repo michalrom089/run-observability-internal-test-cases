@@ -19,15 +19,15 @@ Keep it at one issue run. The backend marks a run slow when a duration is more
 than twice the P95 of the stack's earlier runs. A second slow run has the first
 one in its P95, so the backend does not mark it slow.
 
-| Stack                   | Issue run                                                                    |
-| ----------------------- | ---------------------------------------------------------------------------- |
-| `run-obs-slow-runs-a`   | `time_sleep.database_migration` takes 240 s instead of 5 s.                  |
-| `run-obs-slow-runs-b`   | The `after_plan` hook `policy-scan` takes 240 s instead of 2 s.              |
-| `run-obs-slow-runs-c`   | Init downloads `hashicorp/aws`, `hashicorp/azurerm`, `hashicorp/google`.     |
-| `run-obs-failed-runs-a` | The plan fails. `data.external.image_lookup` exits 1.                        |
-| `run-obs-failed-runs-b` | The `before_plan` hook `validate-config` exits 1.                            |
-| `run-obs-failed-runs-c` | Init fails. `registry.acme.invalid/acme/platform` cannot resolve.            |
-| `run-obs-findings-a`    | The run finishes with `ProviderVersionChange` and `ProviderVersionConflict`. |
+| Stack                   | Issue run                                                                                          |
+| ----------------------- | -------------------------------------------------------------------------------------------------- |
+| `run-obs-slow-runs-a`   | `time_sleep.database_migration` takes 240 s instead of 5 s.                                        |
+| `run-obs-slow-runs-b`   | The `after_plan` hook `policy-scan` takes 240 s instead of 2 s.                                    |
+| `run-obs-slow-runs-c`   | Init downloads `hashicorp/aws`, `hashicorp/azurerm`, `hashicorp/google`. Plan and apply stay fast. |
+| `run-obs-failed-runs-a` | The plan fails. `data.external.image_lookup` exits 1.                                              |
+| `run-obs-failed-runs-b` | The `before_plan` hook `validate-config` exits 1.                                                  |
+| `run-obs-failed-runs-c` | Init fails. `registry.acme.invalid/acme/platform` cannot resolve.                                  |
+| `run-obs-findings-a`    | The run finishes with `ProviderVersionChange` and `ProviderVersionConflict`.                       |
 
 Every stack also has the same decoys, so the culprit is not the only item on
 the dashboard:
@@ -128,5 +128,11 @@ TF_VAR_trigger_issue=true sh ../hooks/step.sh validate-config 1 fail
 
 ## Changing a case
 
-The stacks read this repository through the managed GitHub integration. A
-push to `main` starts a tracked run on each stack whose project root changed.
+The stacks read this repository through the managed GitHub integration.
+Local dev gets no push webhook, so a push does not move a stack's tracked
+commit. After you push a change, sync each stack you changed, then run it:
+
+```bash
+spacectl api 'mutation { stackSyncCommit(id: "<stack>") { id } }'
+spacectl stack deploy --id <stack>
+```

@@ -23,6 +23,7 @@ locals {
     "slow-runs-c" = {
       description = "Init gets slow. It downloads three large providers."
       before_init = ["sh ../hooks/add-providers.sh slow"]
+      after_init  = ["sh ../hooks/add-providers.sh clean"]
     }
     "failed-runs-a" = {
       description = "The plan fails. One data source fails to read."
