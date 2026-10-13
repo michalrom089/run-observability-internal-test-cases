@@ -34,13 +34,12 @@ locals {
       before_plan = ["sh ../hooks/step.sh validate-config 1 fail"]
     }
     "failed-runs-c" = {
-      description = "The apply fails. Three resources fail to create."
+      description = "The apply fails. Three buckets fail to create."
     }
-    # Disabled for now. Enable it to get a stack whose init fails.
-    # "failed-runs-d" = {
-    #   description = "Init fails. One provider cannot be downloaded."
-    #   before_init = ["sh ../hooks/add-providers.sh fail"]
-    # }
+    "failed-runs-d" = {
+      description = "Init fails. One provider cannot be downloaded."
+      before_init = ["sh ../hooks/add-providers.sh fail"]
+    }
     "findings-a" = {
       description = "The run finishes with findings. A provider changes version and resolves at two versions."
       before_init = ["sh ../hooks/provider-findings.sh pin"]
@@ -48,6 +47,7 @@ locals {
     }
   }
 
+  # The disabled cases get no stack and no runs.
   stacks = {
     for key, entry in local.stack_entries : key => {
       description = entry.description
@@ -56,7 +56,7 @@ locals {
       before_plan = concat(local.decoy_hooks.before_plan, try(entry.before_plan, []))
       after_plan  = concat(local.decoy_hooks.after_plan, try(entry.after_plan, []))
       after_apply = local.decoy_hooks.after_apply
-    }
+    } if !contains(var.disabled_cases, key)
   }
 
   # One entry per run. The healthy runs come first. The issue runs follow, and

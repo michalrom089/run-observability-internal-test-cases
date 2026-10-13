@@ -26,8 +26,8 @@ one in its P95, so the backend does not mark it slow.
 | `run-obs-slow-runs-c`   | Init downloads `hashicorp/aws`, `hashicorp/azurerm`, `hashicorp/google` at 1 MiB/s. Plan and apply stay fast. |
 | `run-obs-failed-runs-a` | The plan fails. `data.external.image_lookup` exits 1.                                                         |
 | `run-obs-failed-runs-b` | The `before_plan` hook `validate-config` exits 1.                                                             |
-| `run-obs-failed-runs-c` | The apply fails. The three `terraform_data.deploy_step` resources exit 1 in their provisioner.                |
-| `run-obs-failed-runs-d` | Init fails. `registry.acme.invalid/acme/platform` cannot resolve. Disabled in `spacelift/main.tf` for now.    |
+| `run-obs-failed-runs-c` | The apply fails. The three `terraform_data.bucket` resources exit 1 in their provisioner.                     |
+| `run-obs-failed-runs-d` | Init fails. `registry.acme.invalid/acme/platform` cannot resolve. Disabled by default, see below.             |
 | `run-obs-findings-a`    | The run finishes with `ProviderVersionChange` and `ProviderVersionConflict`.                                  |
 
 Every stack also has the same decoys, so the culprit is not the only item on
@@ -37,6 +37,16 @@ the dashboard:
 - the hooks `fetch-secrets` (`before_init`), `render-config` (`before_plan`)
   and `notify` (`after_apply`)
 - the providers `hashicorp/random` and `hashicorp/time`
+
+### `failed-runs-d`
+
+The case is in `var.disabled_cases` by default, so the bootstrap stack creates
+no stack for it. To enable it in one account, set this env var on that
+account's bootstrap stack:
+
+```
+TF_VAR_disabled_cases=[]
+```
 
 ### `slow-runs-c`
 

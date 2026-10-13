@@ -13,7 +13,7 @@ the reason per stack. Keep that table correct.
 | Path                         | Purpose                                                                                                    |
 | ---------------------------- | ---------------------------------------------------------------------------------------------------------- |
 | `slow-runs-a/` … `-c/`       | Slow cases: a resource, a hook, provider downloads.                                                        |
-| `failed-runs-a/` … `-d/`     | Failed cases: a data source, a hook, three resources, a provider (`-d` is disabled).                       |
+| `failed-runs-a/` … `-d/`     | Failed cases: a data source, a hook, three resources, a provider (`-d` is disabled by default).            |
 | `findings-a/`                | Provider findings: a version change and a version conflict.                                                |
 | `modules/workload/`          | The decoy resources. Every case calls it.                                                                  |
 | `hooks/step.sh`              | Every hook. Sleeps, and is slow or fails on an issue.                                                      |

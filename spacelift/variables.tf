@@ -64,6 +64,12 @@ variable "slow_seconds" {
   default     = 240
 }
 
+variable "disabled_cases" {
+  type        = set(string)
+  description = "Cases that get no stack. The bootstrap stack of an account that wants one of them sets this to a smaller set."
+  default     = ["failed-runs-d"]
+}
+
 variable "name_prefix" {
   type        = string
   description = "Prefix for the stack names."
