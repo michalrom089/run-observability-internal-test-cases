@@ -27,6 +27,7 @@ one in its P95, so the backend does not mark it slow.
 | `run-obs-failed-runs-a` | The plan fails. `data.external.image_lookup` exits 1.                                                         |
 | `run-obs-failed-runs-b` | The `before_plan` hook `validate-config` exits 1.                                                             |
 | `run-obs-failed-runs-c` | Init fails. `registry.acme.invalid/acme/platform` cannot resolve.                                             |
+| `run-obs-failed-runs-d` | The apply fails. The three `terraform_data.deploy_step` resources exit 1 in their provisioner.                |
 | `run-obs-findings-a`    | The run finishes with `ProviderVersionChange` and `ProviderVersionConflict`.                                  |
 
 Every stack also has the same decoys, so the culprit is not the only item on
@@ -70,7 +71,7 @@ The run itself finishes. Nothing in it is slow or fails.
 ## Getting started
 
 This creates one bootstrap stack. The bootstrap stack creates the space, the
-seven stacks and their runs. The commands need spacectl v1.20.0 or later and a
+eight stacks and their runs. The commands need spacectl v1.20.0 or later and a
 spacectl profile.
 
 **1. Create the bootstrap stack.** It reads this repository over the raw Git

@@ -37,6 +37,9 @@ locals {
       description = "Init fails. One provider cannot be downloaded."
       before_init = ["sh ../hooks/add-providers.sh fail"]
     }
+    "failed-runs-d" = {
+      description = "The apply fails. Three resources fail to create."
+    }
     "findings-a" = {
       description = "The run finishes with findings. A provider changes version and resolves at two versions."
       before_init = ["sh ../hooks/provider-findings.sh pin"]

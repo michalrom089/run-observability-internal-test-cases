@@ -4,7 +4,7 @@ Instructions for an agent working in this repository.
 
 ## What this repository is
 
-Seven stacks for internal testing of the run observability dashboard. Each
+Eight stacks for internal testing of the run observability dashboard. Each
 stack runs healthy, then gets slow, fails or gets findings for one known reason. `README.md` lists
 the reason per stack. Keep that table correct.
 
@@ -13,7 +13,7 @@ the reason per stack. Keep that table correct.
 | Path                         | Purpose                                                                                 |
 | ---------------------------- | --------------------------------------------------------------------------------------- |
 | `slow-runs-a/` … `-c/`       | Slow cases: a resource, a hook, provider downloads.                                     |
-| `failed-runs-a/` … `-c/`     | Failed cases: a data source, a hook, a provider.                                        |
+| `failed-runs-a/` … `-d/`     | Failed cases: a data source, a hook, a provider, three resources.                       |
 | `findings-a/`                | Provider findings: a version change and a version conflict.                             |
 | `modules/workload/`          | The decoy resources. Every case calls it.                                               |
 | `hooks/step.sh`              | Every hook. Sleeps, and is slow or fails on an issue.                                   |
