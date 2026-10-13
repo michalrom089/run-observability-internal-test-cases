@@ -3,6 +3,7 @@
 #
 # Every stack runs the same decoy hooks. A case adds its culprit hook, if it
 # has one, next to them. sh ../hooks/step.sh <name> <seconds> [slow|fail].
+# hooks/throttle.sh is sourced with ".", because it exports HTTPS_PROXY to init.
 locals {
   decoy_hooks = {
     before_init = ["sh ../hooks/step.sh fetch-secrets 1"]
@@ -21,9 +22,9 @@ locals {
       after_plan  = ["sh ../hooks/step.sh policy-scan 2 slow"]
     }
     "slow-runs-c" = {
-      description = "Init gets slow. It downloads three large providers."
-      before_init = ["sh ../hooks/add-providers.sh slow"]
-      after_init  = ["sh ../hooks/add-providers.sh clean"]
+      description = "Init gets slow. It downloads three large providers through a throttled proxy."
+      before_init = ["sh ../hooks/add-providers.sh slow", ". ../hooks/throttle.sh start"]
+      after_init  = [". ../hooks/throttle.sh stop", "sh ../hooks/add-providers.sh clean"]
     }
     "failed-runs-a" = {
       description = "The plan fails. One data source fails to read."

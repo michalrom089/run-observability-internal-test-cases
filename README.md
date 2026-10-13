@@ -19,15 +19,15 @@ Keep it at one issue run. The backend marks a run slow when a duration is more
 than twice the P95 of the stack's earlier runs. A second slow run has the first
 one in its P95, so the backend does not mark it slow.
 
-| Stack                   | Issue run                                                                                          |
-| ----------------------- | -------------------------------------------------------------------------------------------------- |
-| `run-obs-slow-runs-a`   | `time_sleep.database_migration` takes 240 s instead of 5 s.                                        |
-| `run-obs-slow-runs-b`   | The `after_plan` hook `policy-scan` takes 240 s instead of 2 s.                                    |
-| `run-obs-slow-runs-c`   | Init downloads `hashicorp/aws`, `hashicorp/azurerm`, `hashicorp/google`. Plan and apply stay fast. |
-| `run-obs-failed-runs-a` | The plan fails. `data.external.image_lookup` exits 1.                                              |
-| `run-obs-failed-runs-b` | The `before_plan` hook `validate-config` exits 1.                                                  |
-| `run-obs-failed-runs-c` | Init fails. `registry.acme.invalid/acme/platform` cannot resolve.                                  |
-| `run-obs-findings-a`    | The run finishes with `ProviderVersionChange` and `ProviderVersionConflict`.                       |
+| Stack                   | Issue run                                                                                                     |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `run-obs-slow-runs-a`   | `time_sleep.database_migration` takes 240 s instead of 5 s.                                                   |
+| `run-obs-slow-runs-b`   | The `after_plan` hook `policy-scan` takes 240 s instead of 2 s.                                               |
+| `run-obs-slow-runs-c`   | Init downloads `hashicorp/aws`, `hashicorp/azurerm`, `hashicorp/google` at 1 MiB/s. Plan and apply stay fast. |
+| `run-obs-failed-runs-a` | The plan fails. `data.external.image_lookup` exits 1.                                                         |
+| `run-obs-failed-runs-b` | The `before_plan` hook `validate-config` exits 1.                                                             |
+| `run-obs-failed-runs-c` | Init fails. `registry.acme.invalid/acme/platform` cannot resolve.                                             |
+| `run-obs-findings-a`    | The run finishes with `ProviderVersionChange` and `ProviderVersionConflict`.                                  |
 
 Every stack also has the same decoys, so the culprit is not the only item on
 the dashboard:
@@ -36,6 +36,23 @@ the dashboard:
 - the hooks `fetch-secrets` (`before_init`), `render-config` (`before_plan`)
   and `notify` (`after_apply`)
 - the providers `hashicorp/random` and `hashicorp/time`
+
+### `slow-runs-c`
+
+In the issue run, four hooks run around init:
+
+- `before_init` runs `hooks/add-providers.sh slow`. It adds `hashicorp/aws`,
+  `hashicorp/azurerm` and `hashicorp/google`, about 280 MB together.
+- `before_init` sources `hooks/throttle.sh start`. It starts
+  `hooks/throttle-proxy.py` and exports `HTTPS_PROXY`, so init downloads the
+  providers at 1 MiB/s. `hashicorp/aws` alone takes about 3 minutes.
+- `after_init` sources `hooks/throttle.sh stop`. It stops the proxy.
+- `after_init` runs `hooks/add-providers.sh clean`. It removes the providers
+  again. Plan and apply start every provider the configuration requires, and
+  the large ones take tens of seconds to load.
+
+`throttle.sh` is sourced with `.`, because only a sourced file can export a
+variable to init. Set `THROTTLE_BYTES_PER_SECOND` to change the rate.
 
 ### `findings-a`
 
@@ -109,7 +126,7 @@ spacectl stack deploy --id run-obs-int-bootstrap
 ```
 
 The runs fire once, when the bootstrap stack creates the stacks. A slow issue
-run takes about 4 minutes, so give the stacks about 15 minutes.
+run takes about 5 minutes, so give the stacks about 15 minutes.
 
 ## Running more issue runs
 

@@ -19,6 +19,8 @@ the reason per stack. Keep that table correct.
 | `hooks/step.sh`              | Every hook. Sleeps, and is slow or fails on an issue.                                   |
 | `hooks/add-providers.sh`     | Adds providers before init in the `-c` cases. Removes them after init in `slow-runs-c`. |
 | `hooks/provider-findings.sh` | Pins and installs `hashicorp/random` in `findings-a`.                                   |
+| `hooks/throttle.sh`          | Sourced. Starts and stops the download proxy around init in `slow-runs-c`.              |
+| `hooks/throttle-proxy.py`    | The HTTPS proxy that `throttle.sh` starts. Limits each connection to a set rate.        |
 | `spacelift/`                 | Not a case. Creates the space, the stacks and the runs.                                 |
 
 ## Rules
@@ -45,7 +47,9 @@ TF_VAR_trigger_issue=true TF_VAR_slow_seconds=8 tofu apply -auto-approve
 ```
 
 For a `-c` case, run `TF_VAR_trigger_issue=true sh ../hooks/add-providers.sh <slow|fail>`
-before init. For a `-b` case, run the hook from `spacelift/main.tf` by hand.
+before init. For `slow-runs-c`, also source
+`TF_VAR_trigger_issue=true; . ../hooks/throttle.sh start` before init and
+`. ../hooks/throttle.sh stop` after it. For a `-b` case, run the hook from `spacelift/main.tf` by hand.
 Delete `.terraform/`, the lock file, the state and `*_override.tf` afterwards.
 
 ## The `spacelift/` directory
