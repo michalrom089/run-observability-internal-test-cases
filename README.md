@@ -7,7 +7,8 @@ uses the dashboard to find that reason.
 
 Nothing here costs money. The resources are `terraform_data`, `time_sleep` and
 `random_id`. The large providers in `slow-runs-c` are downloaded, but no
-resource uses them.
+resource uses them. `failed-runs-c` sends three `CreateBucket` calls to S3 with
+fake keys, and S3 rejects them.
 
 ## Stacks
 
@@ -26,7 +27,7 @@ one in its P95, so the backend does not mark it slow.
 | `run-obs-slow-runs-c`   | Init downloads `hashicorp/aws`, `hashicorp/azurerm`, `hashicorp/google` at 1 MiB/s. Plan and apply stay fast. |
 | `run-obs-failed-runs-a` | The plan fails. `data.external.image_lookup` exits 1.                                                         |
 | `run-obs-failed-runs-b` | The `before_plan` hook `validate-config` exits 1.                                                             |
-| `run-obs-failed-runs-c` | The apply fails. The three `terraform_data.bucket` resources exit 1 in their provisioner.                     |
+| `run-obs-failed-runs-c` | The apply fails. S3 rejects the three `aws_s3_bucket.bucket` resources with 403 `InvalidAccessKeyId`.         |
 | `run-obs-failed-runs-d` | Init fails. `registry.acme.invalid/acme/platform` cannot resolve. Disabled by default, see below.             |
 | `run-obs-findings-a`    | The run finishes with `ProviderVersionChange` and `ProviderVersionConflict`.                                  |
 
