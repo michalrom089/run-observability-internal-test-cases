@@ -34,12 +34,13 @@ locals {
       before_plan = ["sh ../hooks/step.sh validate-config 1 fail"]
     }
     "failed-runs-c" = {
-      description = "Init fails. One provider cannot be downloaded."
-      before_init = ["sh ../hooks/add-providers.sh fail"]
-    }
-    "failed-runs-d" = {
       description = "The apply fails. Three resources fail to create."
     }
+    # Disabled for now. Enable it to get a stack whose init fails.
+    # "failed-runs-d" = {
+    #   description = "Init fails. One provider cannot be downloaded."
+    #   before_init = ["sh ../hooks/add-providers.sh fail"]
+    # }
     "findings-a" = {
       description = "The run finishes with findings. A provider changes version and resolves at two versions."
       before_init = ["sh ../hooks/provider-findings.sh pin"]

@@ -11,13 +11,6 @@ terraform {
   }
 }
 
-# The run environment sets this. The first runs of a stack leave it alone.
-variable "trigger_issue" {
-  type        = bool
-  description = "Makes this run misbehave the way the case describes."
-  default     = false
-}
-
 # The timestamp forces replacement on every apply, so every run has work to do.
 resource "terraform_data" "trigger" {
   input = timestamp()
@@ -30,22 +23,8 @@ module "workload" {
   trigger = terraform_data.trigger.output
 }
 
-# The culprits. The three steps do not depend on each other, so the apply
-# starts them together. With trigger_issue set, every provisioner exits 1 and
-# the apply reports three failed resources.
-locals {
-  deploy_steps = toset(["migrate_schema", "warm_cache", "publish_release"])
-}
-
-resource "terraform_data" "deploy_step" {
-  for_each = local.deploy_steps
-
-  triggers_replace = terraform_data.trigger.output
-
-  provisioner "local-exec" {
-    command = "sh ${path.module}/deploy-step.sh ${each.key} ${var.trigger_issue}"
-  }
-}
+# The culprit is init. The before_init hook adds a provider that cannot be
+# downloaded. See hooks/add-providers.sh.
 
 resource "random_id" "output" {
   byte_length = 7

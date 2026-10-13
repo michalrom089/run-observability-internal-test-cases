@@ -4,24 +4,24 @@ Instructions for an agent working in this repository.
 
 ## What this repository is
 
-Eight stacks for internal testing of the run observability dashboard. Each
+Seven stacks for internal testing of the run observability dashboard. Each
 stack runs healthy, then gets slow, fails or gets findings for one known reason. `README.md` lists
 the reason per stack. Keep that table correct.
 
 ## Layout
 
-| Path                         | Purpose                                                                                 |
-| ---------------------------- | --------------------------------------------------------------------------------------- |
-| `slow-runs-a/` … `-c/`       | Slow cases: a resource, a hook, provider downloads.                                     |
-| `failed-runs-a/` … `-d/`     | Failed cases: a data source, a hook, a provider, three resources.                       |
-| `findings-a/`                | Provider findings: a version change and a version conflict.                             |
-| `modules/workload/`          | The decoy resources. Every case calls it.                                               |
-| `hooks/step.sh`              | Every hook. Sleeps, and is slow or fails on an issue.                                   |
-| `hooks/add-providers.sh`     | Adds providers before init in the `-c` cases. Removes them after init in `slow-runs-c`. |
-| `hooks/provider-findings.sh` | Pins and installs `hashicorp/random` in `findings-a`.                                   |
-| `hooks/throttle.sh`          | Sourced. Starts and stops the download proxy around init in `slow-runs-c`.              |
-| `hooks/throttle-proxy.py`    | The HTTPS proxy that `throttle.sh` starts. Limits each connection to a set rate.        |
-| `spacelift/`                 | Not a case. Creates the space, the stacks and the runs.                                 |
+| Path                         | Purpose                                                                                                    |
+| ---------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `slow-runs-a/` … `-c/`       | Slow cases: a resource, a hook, provider downloads.                                                        |
+| `failed-runs-a/` … `-d/`     | Failed cases: a data source, a hook, three resources, a provider (`-d` is disabled).                       |
+| `findings-a/`                | Provider findings: a version change and a version conflict.                                                |
+| `modules/workload/`          | The decoy resources. Every case calls it.                                                                  |
+| `hooks/step.sh`              | Every hook. Sleeps, and is slow or fails on an issue.                                                      |
+| `hooks/add-providers.sh`     | Adds providers before init in `slow-runs-c` and `failed-runs-d`. Removes them after init in `slow-runs-c`. |
+| `hooks/provider-findings.sh` | Pins and installs `hashicorp/random` in `findings-a`.                                                      |
+| `hooks/throttle.sh`          | Sourced. Starts and stops the download proxy around init in `slow-runs-c`.                                 |
+| `hooks/throttle-proxy.py`    | The HTTPS proxy that `throttle.sh` starts. Limits each connection to a set rate.                           |
+| `spacelift/`                 | Not a case. Creates the space, the stacks and the runs.                                                    |
 
 ## Rules
 
@@ -46,7 +46,7 @@ tofu init && tofu apply -auto-approve
 TF_VAR_trigger_issue=true TF_VAR_slow_seconds=8 tofu apply -auto-approve
 ```
 
-For a `-c` case, run `TF_VAR_trigger_issue=true sh ../hooks/add-providers.sh <slow|fail>`
+For `slow-runs-c` and `failed-runs-d`, run `TF_VAR_trigger_issue=true sh ../hooks/add-providers.sh <slow|fail>`
 before init. For `slow-runs-c`, also source
 `TF_VAR_trigger_issue=true; . ../hooks/throttle.sh start` before init and
 `. ../hooks/throttle.sh stop` after it. For a `-b` case, run the hook from `spacelift/main.tf` by hand.
