@@ -105,7 +105,7 @@ spacectl api --variables '{
     "administrative": false,
     "labels": ["run-observability", "bootstrap"],
     "vendorConfig": {
-      "opentofu": { "version": "1.10.6", "workflowTool": "OPENTOFU" }
+      "opentofu": { "version": "1.13.1", "workflowTool": "OPENTOFU" }
     }
   },
   "manageState": true
